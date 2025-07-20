@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ['nodejs', 'yarn']
+
+[phases.install]
+cmds = ['bundle install']
+
+[phases.build]
+cmds = [
+  'bundle exec rake assets:precompile',
+  'bundle exec rake assets:clean'
+]
+
+[start]
+cmd = 'bundle exec puma -C config/puma.rb'
