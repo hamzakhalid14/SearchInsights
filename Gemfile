@@ -11,7 +11,7 @@ gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 
-gem 'redis'
+gem 'redis', '>= 4.0.1'
 gem 'sidekiq'
 gem 'rack-attack' # Pour le rate limiting
 
@@ -41,7 +41,7 @@ gem "bootsnap", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ]
+  gem "debug", ">= 1.0.0", platforms: %i[ mri windows ]
 
   # RSpec for testing
   gem 'rspec-rails', '~> 6.0'

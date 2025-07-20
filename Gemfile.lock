@@ -261,7 +261,7 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap
-  debug
+  debug (>= 1.0.0)
   error_highlight (>= 0.4.0)
   factory_bot_rails (~> 6.2)
   faker (~> 3.2)
@@ -269,7 +269,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rack-attack
   rails (~> 7.1.5, >= 7.1.5.1)
-  redis
+  redis (>= 4.0.1)
   rspec-rails (~> 6.0)
   sidekiq
   tzinfo-data
