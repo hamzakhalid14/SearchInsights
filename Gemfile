@@ -11,6 +11,9 @@ gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 
+# Force compatible nokogiri version
+gem 'nokogiri', '~> 1.15.0'
+
 gem 'redis', '>= 4.0.1'
 gem 'sidekiq'
 gem 'rack-attack' # Pour le rate limiting
