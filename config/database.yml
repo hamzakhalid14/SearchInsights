@@ -79,6 +79,4 @@ test:
 #
 production:
   <<: *default
-  database: search_insights_production
-  username: search_insights
-  password: <%= ENV["SEARCH_INSIGHTS_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
