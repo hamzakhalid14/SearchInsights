@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SearchInsights Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-center mb-8">Search Analytics Dashboard</h1>
+
+      <!-- Search Box -->
+      <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Try searching for something</h2>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Type your search here..."
+          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <div id="searchStatus" class="mt-2 text-sm text-gray-500"></div>
+      </div>
+
+      <!-- Analytics Sections -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Global Analytics -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Top Searches</h2>
+          <div id="topSearches" class="space-y-2">
+            <div class="animate-pulse">Loading analytics...</div>
+          </div>
+          <canvas id="searchesChart" class="mt-4"></canvas>
+        </div>
+
+        <!-- User Analytics -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Your Search History</h2>
+          <div id="userSearches" class="space-y-2">
+            <div class="animate-pulse">Loading your history...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // API Base URL for Vercel deployment
+  const API_BASE = window.location.origin;
+
+  // Track user IP
+  let userIp = 'unknown';
+
+  // Debounce function to limit API calls
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  // Track search queries
+  const searchInput = document.getElementById('searchInput');
+  const searchStatus = document.getElementById('searchStatus');
+
+  searchInput.addEventListener('input', debounce(function(e) {
+    const query = e.target.value.trim();
+    if (query.length > 0) {
+      trackSearch(query);
+    }
+  }, 300));
+
+  function trackSearch(query) {
+    searchStatus.textContent = 'Recording search...';
+
+    fetch(`${API_BASE}/api/v1/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+      userIp = data.user_ip || userIp;
+      searchStatus.textContent = 'Search recorded';
+      setTimeout(() => searchStatus.textContent = '', 2000);
+      loadAnalytics();
+    })
+    .catch(error => {
+      searchStatus.textContent = 'Error recording search';
+      console.error('Error:', error);
+    });
+  }
+
+  // Load analytics data
+  function loadAnalytics() {
+    // Load top searches
+    fetch(`${API_BASE}/api/v1/analytics`)
+    .then(response => response.json())
+    .then(data => {
+      const topSearchesDiv = document.getElementById('topSearches');
+      topSearchesDiv.innerHTML = '';
+
+      if (data.top_searches && Object.keys(data.top_searches).length > 0) {
+        Object.entries(data.top_searches).forEach(([query, count]) => {
+          const searchItem = document.createElement('div');
+          searchItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+          searchItem.innerHTML = `
+            <span class="font-medium">${query}</span>
+            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">${count} searches</span>
+          `;
+          topSearchesDiv.appendChild(searchItem);
+        });
+
+        // Update chart
+        updateChart(data.top_searches);
+      } else {
+        topSearchesDiv.innerHTML = '<div class="text-gray-500">No search data available yet</div>';
+      }
+    })
+    .catch(error => {
+      console.error('Error loading analytics:', error);
+      document.getElementById('topSearches').innerHTML = '<div class="text-red-500">Error loading analytics</div>';
+    });
+
+    // Load user searches if we have IP
+    if (userIp && userIp !== 'unknown') {
+      fetch(`${API_BASE}/api/v1/user_analytics`)
+      .then(response => response.json())
+      .then(data => {
+        const userSearchesDiv = document.getElementById('userSearches');
+        userSearchesDiv.innerHTML = '';
+
+        if (data.searches && data.searches.length > 0) {
+          data.searches.forEach(([query, count]) => {
+            const searchItem = document.createElement('div');
+            searchItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+            searchItem.innerHTML = `
+              <span>${query}</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">${count}x</span>
+            `;
+            userSearchesDiv.appendChild(searchItem);
+          });
+        } else {
+          userSearchesDiv.innerHTML = '<div class="text-gray-500">Your search history will appear here</div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error loading user analytics:', error);
+      });
+    }
+  }
+
+  // Chart initialization
+  let searchesChart;
+  function updateChart(searchData) {
+    const ctx = document.getElementById('searchesChart').getContext('2d');
+    const labels = Object.keys(searchData);
+    const data = Object.values(searchData);
+
+    if (searchesChart) {
+      searchesChart.destroy();
+    }
+
+    searchesChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Search Count',
+          data: data,
+          backgroundColor: 'rgba(59, 130, 246, 0.5)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // Initial load
+  document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+</body>
+</html>

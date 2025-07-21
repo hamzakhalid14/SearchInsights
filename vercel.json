@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "name": "searchinsights",
+  "functions": {
+    "api/v1/*.rb": {
+      "runtime": "@vercel/ruby"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/v1/search",
+      "dest": "/api/v1/search.rb"
+    },
+    {
+      "src": "/api/v1/analytics",
+      "dest": "/api/v1/analytics.rb"
+    },
+    {
+      "src": "/api/v1/user_analytics",
+      "dest": "/api/v1/user_analytics.rb"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "env": {
+    "RAILS_ENV": "production"
+  }
+}
