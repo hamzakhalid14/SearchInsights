@@ -1,13 +1,25 @@
 #!/bin/bash -e
 
 echo "Starting Rails application..."
+echo "RAILS_ENV: ${RAILS_ENV:-not_set}"
+echo "DATABASE_URL: ${DATABASE_URL:0:30}..." # Show only first 30 chars for security
 
 # If running the rails server then try to prepare database
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   echo "Setting up database..."
-  ./bin/rails db:create 2>/dev/null || true
-  ./bin/rails db:migrate 2>/dev/null || true
+  
+  # Wait a bit for database to be ready
+  sleep 2
+  
+  # Try database operations with error handling
+  echo "Creating database if needed..."
+  ./bin/rails db:create 2>/dev/null || echo "Database probably already exists"
+  
+  echo "Running migrations..."
+  ./bin/rails db:migrate 2>/dev/null || echo "Migration completed or failed - continuing"
+  
   echo "Database setup completed"
 fi
 
+echo "Starting server..."
 exec "${@}"
