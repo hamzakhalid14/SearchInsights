@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   root 'home#index'
   get '/dashboard', to: 'home#index', as: 'dashboard'
 
+  # Health check endpoint
+  get '/health', to: proc { [200, { 'Content-Type' => 'application/json' }, ['{"status":"ok"}']] }
+
   # API Routes seulement
   namespace :api do
     namespace :v1 do

@@ -1,5 +1,5 @@
 # db/migrate/[timestamp]_create_user_searches.rb
-class CreateUserSearches < ActiveRecord::Migration[6.1]
+class CreateUserSearches < ActiveRecord::Migration[7.1]
   def change
     create_table :user_searches do |t|
       t.string :user_ip, null: false

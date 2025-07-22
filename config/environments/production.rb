@@ -15,9 +15,14 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local = false
 
+  # Enable detailed error logging for Railway debugging
+  config.log_level = :info
+  config.logger = ActiveSupport::Logger.new(STDOUT)
+  config.logger.formatter = ::Logger::Formatter.new
+
   # Ensures that a master key has been made available in ENV["RAILS_MASTER_KEY"], config/master.key, or an environment
   # key such as config/credentials/production.key. This key is used to decrypt credentials (and other encrypted files).
-  # config.require_master_key = true
+  config.require_master_key = false
 
   # Disable serving static files from `public/`, relying on NGINX/Apache to do so instead.
   config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present? || ENV['RAILWAY_ENVIRONMENT'].present?
@@ -87,4 +92,7 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # Permettre toutes les requêtes en production Railway
+  config.hosts.clear
 end

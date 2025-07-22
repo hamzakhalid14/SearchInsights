@@ -1,5 +1,5 @@
 # db/migrate/[timestamp]_create_search_queries.rb
-class CreateSearchQueries < ActiveRecord::Migration[6.1]
+class CreateSearchQueries < ActiveRecord::Migration[7.1]
   def change
     create_table :search_queries do |t|
       t.string :user_ip, null: false
@@ -13,5 +13,3 @@ class CreateSearchQueries < ActiveRecord::Migration[6.1]
     add_index :search_queries, :is_complete
   end
 end
-
-
